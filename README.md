@@ -13,6 +13,9 @@
 | **Radar Detector** | Uniden R8 |
 | **Companion App** | Highway Radar (Android) |
 | **App Version** | v3.2 (current as of June 2026) |
+| **Navigation (Dash)** | Google Maps via Android Auto → Porsche PCM |
+| **Navigation (Backup)** | Gaia GPS on iPad (offline topo + routes) |
+| **Crowdsource Layer** | Waze + WzSabre 2.2 (split screen on Z Fold 6) |
 
 ---
 
@@ -317,6 +320,275 @@ Recommended profiles for GT3RS use cases:
 
 ---
 
+## 🗺️ Navigation Stack — GT3RS Multi-Device Setup
+
+This section covers the ideal navigation and law enforcement awareness solution for the GT3RS, using three simultaneous tools: **Galaxy Z Fold 6** (primary), **Google Maps via Porsche PCM/Android Auto** (dash display), and **Gaia GPS on iPad** (backup/route navigation).
+
+---
+
+### 🏗️ System Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   DEVICE ROLES                              │
+├──────────────────────┬──────────────────────┬──────────────┤
+│  Z Fold 6 (inner)    │  Porsche PCM Screen  │  iPad Mini   │
+│  ─────────────────   │  ─────────────────   │  ─────────── │
+│  Highway Radar (top) │  Google Maps via     │  Gaia GPS    │
+│  Waze (bottom split) │  Android Auto        │  (offline    │
+│  WzSabre (bg svc)    │  (navigation audio   │  topo/route  │
+│                      │  + turn-by-turn to   │  backup)     │
+│  LE Awareness        │  dash screen)        │              │
+│  Radar Alerts        │  Primary Nav         │  Off-road or │
+│  CSA Data Source     │  ETA / Rerouting     │  canyon legs │
+└──────────────────────┴──────────────────────┴──────────────┘
+```
+
+**Core principle:** Each device has one primary job. Never fight audio between devices — establish a clear audio priority chain.
+
+---
+
+### 📱 Z Fold 6 — Configuration
+
+The Z Fold 6's 7.6-inch inner display is ideal for running Highway Radar and Waze simultaneously in split screen.
+
+#### Recommended App Layout (Inner Display, Landscape or Portrait)
+
+| Position | App | Role |
+|----------|-----|------|
+| Top half (or left 55%) | **Highway Radar** | Radar alerts, CSA, aircraft, R8 integration |
+| Bottom half (or right 45%) | **Waze** | Crowdsource reporting, community police data, live rerouting |
+| Background service | **WzSabre** | Feeds Waze crowd data into Highway Radar |
+| Background | **Google Maps** | Preloaded, feeds turn-by-turn to Porsche PCM via Android Auto |
+
+#### Split Screen Setup on Z Fold 6
+
+**Method 1 — Highway Radar Automation (recommended):**
+1. In Highway Radar: Settings → General → Action on service start
+2. Set to **"Start another app in split screen"**
+3. Choose Waze as the companion app
+4. Choose which half Highway Radar occupies
+5. Highway Radar will automatically split-screen with Waze each time you tap Start
+
+> 📝 **Note from ferius (v3.2 release):** Highway Radar only uses the accessibility service on Android 12 and below for startup automation. On Android 13+, use Samsung's native Multi-Window tools or save the app pairing manually.
+
+**Method 2 — Samsung Multi-Window (Android 13+):**
+1. Open Highway Radar
+2. Swipe two fingers inward from the left edge to trigger split screen
+3. Choose Waze from the app picker
+4. Resize the divider to give HR slightly more space (LE awareness > nav)
+5. Tap the three dots at center → save as **app pair** to your home screen or Edge Panel
+6. One tap from the Edge Panel launches both apps simultaneously every drive
+
+**Method 3 — Edge Panel App Pair:**
+- Set up a saved pairing of Highway Radar + Waze in the Edge Panel
+- Place the pair icon in your car mount routine
+- Unfold, tap the pair, you're running in under 3 seconds
+
+#### Z Fold 6 Waze Setup (for split-screen use)
+
+When running Waze in the bottom half of the Z Fold 6 split screen alongside Highway Radar:
+
+| Setting | Recommended Value | Reason |
+|---------|-----------------|--------|
+| Navigation voice | **Off** or very low | Google Maps/Android Auto handles voice nav on the dash |
+| Police / hazard alerts audio | **On** | Redundant LE warning layer |
+| Speed camera alerts | **On** | Fixed camera coverage |
+| Chit-chat | **Off** | Reduces noise in split screen |
+| Map display | **2D / North up** | Easier to read in smaller pane |
+| Show Wazers | **Off** | Reduces visual clutter in small pane |
+| Show traffic | **On** | Real-time flow visible |
+| Personalize ETA | **On** | Settings → Navigation → Personalization → On |
+| Avoid toll roads | Per preference | |
+| Go invisible | **On** | Reduces privacy exposure |
+| Speedometer / speed limit | **Always show** | Secondary speed limit reference |
+| Speed alert threshold | 5–10 mph over | Personal preference |
+| Report button | **Submit via SABRE** (if HR configured) | Allows reporting without leaving HR |
+| Background running | **Unrestricted battery** | Critical — disable battery optimization |
+
+> ⚠️ **Key: Waze audio priority.** When Google Maps is running via Android Auto to the Porsche PCM, set Waze voice to OFF or silent on the phone — its job on the Z Fold 6 is **visual** crowdsource data, not audio nav. Highway Radar handles all audio on the phone. This prevents three apps fighting for audio simultaneously.
+
+#### Z Fold 6 Highway Radar Settings for Multi-Device Setup
+
+| Setting | Value | Notes |
+|---------|-------|-------|
+| Audio output | Phone speakers (or BT headset) | NOT routed to Android Auto |
+| Back button action | **Background** | Keeps service running when switching apps |
+| Activate PIP on home button | **Off** | Prevents conflict with Android Auto activation |
+| Preload Waze on start | **Enabled** (if split screen not set) | Keeps Waze warm in background for CSA |
+| Display from sleeping | **When running OR charging** | Always-on while mounted |
+
+#### Android Auto Setup (Z Fold 6 → Porsche PCM)
+
+The Z Fold 6 connects to the Porsche PCM wirelessly via Android Auto:
+
+1. On the Z Fold 6: Settings → Connected devices → Connection preferences → Android Auto → Wireless
+2. In Porsche PCM: Devices → Connect new devices → Connect Android Auto
+3. Once paired wirelessly, connection is automatic on entering the car
+4. Set **Google Maps as the default navigation app** in Android Auto settings
+5. Google Maps will display on the PCM screen with full turn-by-turn, voice, and Waze-integrated reports
+
+> ✅ **Google Maps + Waze data (2026):** As of early 2026, Google Maps has integrated Waze's community incident reports (police, hazards, accidents) natively. When running Google Maps via Android Auto on the PCM screen, you receive Waze-sourced LE reports **without needing Waze open** — though running Waze open on the phone feeds additional reports and improves coverage.
+
+> ⚠️ **Porsche PCM note:** Navigation apps via Android Auto (Google Maps) do not run in parallel with PCM's built-in navigation. When Android Auto is active, PCM nav is replaced. This is the intended setup — let Android Auto take over the PCM screen entirely.
+
+---
+
+### 🗺️ Waze — Best Practices & Optimal Settings
+
+Waze's primary role in this stack is as a **crowdsource data engine** and secondary visual display. When WzSabre is active, Waze also feeds Highway Radar's CSA system directly.
+
+#### Critical Waze Settings (Android, 2025–2026)
+
+**Alerts & Reports:**
+- Police reports: **On** — community-sourced LE position data
+- Speed cameras: **On** — fixed enforcement coverage
+- Road hazards: **On**
+- Traffic: **On**
+- Chit-chat: **Off** — unnecessary audio noise
+- Report reminder: **Off** (reduces distractions)
+
+**Navigation:**
+- Personalized ETA: **On** (Settings → Navigation → Personalization)
+  - Waze uses your actual driving history to improve ETAs
+- Avoid toll roads: Per preference
+- Route comparison: **On** — see all route options before departure
+
+**Voice & Sound:**
+- Voice directions: **Off** when Google Maps is on dash
+- Alert sounds: **On** (police/hazard sounds still fire through phone)
+- Music/audio integration: **Off** (let car audio handle it)
+
+**Display:**
+- Color scheme: **Automatic** (day/night based on time)
+- Show speed limit: **Always**
+- Show Wazers: **Off** (reduces visual clutter in split screen)
+
+**Privacy:**
+- Go invisible: **On** — hides your icon from other users (still contributes to traffic data)
+
+**Battery & Background:**
+- Battery optimization: **Disabled** (Unrestricted) — essential, re-check after every Waze update
+- Background activity: **Always allowed**
+
+#### Waze Reporting Best Practices
+
+- Use **voice commands** for reporting while driving: say "Report police" or "Report hazard"
+- Highway Radar's report button can be set to **"Submit report via SABRE"** — files a report from HR's UI without switching to Waze
+- Report police as **"Confirmed"** not just "visible" for stronger signal to other users
+- When WzSabre is running, your Waze reports automatically feed into Highway Radar's CSA layer
+
+#### Waze + Google Maps Cross-Feed (2026 update)
+
+As of March 2026, Google has rolled out a pilot integrating Google Maps real-time alerts into Waze (and vice versa). Key implications for this setup:
+
+- Google Maps on the PCM now shows Waze-sourced police/hazard reports
+- Waze on the phone shows Google Maps real-time traffic incidents
+- This **significantly improves coverage** compared to running either app alone
+- Running both apps (Waze on Z Fold 6 + Google Maps on PCM) is the maximum-coverage configuration — not redundant
+
+---
+
+### 🧭 iPad + Gaia GPS — Backup Navigation
+
+The iPad running Gaia GPS serves as the **offline/independent navigation layer** — particularly valuable for:
+- Track days, canyon routes, or remote roads not well-mapped by Waze/Google
+- Cell-dead zones (Gaia works fully offline with pre-downloaded maps)
+- Route preview before the drive (plan in detail on the larger screen)
+- Topo and terrain awareness on challenging roads
+
+#### Gaia GPS Setup for GT3RS Use
+
+**Before the drive (at home/WiFi):**
+- Download offline maps for your route region: Gaia → Downloads → Download map tiles
+  - Download at zoom levels 12–16 for road detail
+  - For canyon/track routes, add topo layers (USGS 1:24k recommended)
+- Import your planned route as a GPX track
+- Pre-download: Satellite imagery overlays for key sections
+
+**Subscription note:** Offline map downloads require a Gaia GPS Premium subscription. Download map tiles before departing — you cannot download while offline.
+
+**In-drive settings:**
+- Keep iPad in a secondary mount (passenger area, not competing with PCM screen)
+- Lock to route view, auto-follow GPS
+- Screen timeout: **Never** (keep screen on while plugged in)
+- Airplane mode: **Off** (GPS works regardless; cell data allows map refresh if available)
+
+**Gaia GPS role hierarchy:**
+| Scenario | Primary Nav | Backup Nav |
+|----------|------------|-----------|
+| Highway/city driving | Google Maps (PCM) | Waze (Z Fold 6) |
+| Remote / canyon | Gaia GPS (iPad) | Google Maps offline |
+| Track day | Gaia GPS (iPad) | None needed |
+| Cell dead zone | Gaia GPS (iPad) | Google Maps offline |
+
+---
+
+### 🎵 Audio Priority Chain
+
+Running three navigation apps creates audio conflicts. Follow this hierarchy:
+
+```
+Priority 1 (HIGHEST) — Highway Radar
+  └── Radar/laser alerts, police CSA, aircraft alerts
+  └── Comes through phone speaker or BT, always audible
+
+Priority 2 — Google Maps (via Android Auto → Porsche PCM)
+  └── Turn-by-turn voice navigation
+  └── Route change warnings
+  └── Through car speakers (PCM / Android Auto audio stream)
+
+Priority 3 — Waze (Z Fold 6, visual only)
+  └── Voice: OFF — visual alerts only on phone screen
+  └── Exception: enable Waze alert sounds only if no Android Auto connection
+
+Priority 4 (LOWEST) — Gaia GPS (iPad)
+  └── Muted by default in this setup
+  └── Visual reference only; audio enabled only when solo nav tool
+```
+
+**Practical audio setup:**
+- Z Fold 6 → **phone volume** controls HR audio (set to audible)
+- Android Auto stream → **car volume** controls Google Maps nav voice
+- These are independent audio streams — HR alerts fire over car audio naturally
+- Set Waze voice to **Off** completely when Android Auto is active
+- If Android Auto disconnects mid-drive, re-enable Waze voice as fallback
+
+---
+
+### 🔄 Startup Sequence (Every Drive)
+
+Following a consistent startup sequence prevents app conflicts:
+
+1. **Plug in / mount Z Fold 6** — USB-C to car charger (keep charging; GPS + multi-app drains battery)
+2. **Android Auto connects** to PCM wirelessly (automatic after initial setup)
+3. **Open Google Maps** on Android Auto side and set destination (shown on PCM screen)
+4. **Start Waze** on Z Fold 6 — let it load, GPS lock confirmed
+5. **Start Highway Radar** — tap Start (triggers split screen with Waze automatically)
+6. **Confirm WzSabre is connected** — check HWR CSA status indicator (green = active)
+7. **Verify audio**: HR alerts audible via phone; Google Maps voice via car speakers; Waze voice off
+8. **iPad/Gaia** — open route if needed, set to auto-follow, mount in secondary position
+9. **Drive** — do not touch apps except for HR mute/unmute and police reports
+
+> ⚠️ **Battery optimization reminder:** After any app update (Waze, WzSabre, Highway Radar), re-check battery optimization settings. Android silently re-enables them during updates — this is the #1 cause of CSA failures.
+
+---
+
+### 🛠️ Troubleshooting Common Multi-App Issues
+
+| Issue | Cause | Fix |
+|-------|-------|-----|
+| CSA alerts not showing | WzSabre battery-optimized or outdated | Disable battery opt for WzSabre; update to 2.2+ |
+| HR split screen not launching Waze | Accessibility service issue (Android 13+) | Use Samsung Multi-Window pairing instead |
+| Google Maps not showing on PCM | Android Auto disconnected | Re-enable wireless AA in phone settings |
+| Three audio sources at once | Waze voice left on | Disable Waze voice when Android Auto active |
+| HR audio missing | PIP mode activated by AA | Disable "Activate PIP on home button" in HR settings |
+| Gaia GPS losing position | Screen timeout killed GPS | Set screen timeout to Never when navigating |
+| Z Fold 6 overheating | Multi-app + GPS + charging | Ensure good ventilation on mount; avoid direct sun |
+
+
+---
+
 ## 🏁 ALP (Anti Laser Pro) Integration Notes
 
 The ALP system is a laser defense (jammer) system independent of the Highway Radar app. Key integration notes for GT3RS install:
@@ -392,6 +664,7 @@ GT3RS-ALP-R8-Rally-Repo/
 
 | Date | Change |
 |------|--------|
+| 2026-06-05 | Added Navigation Stack section: Z Fold 6 multi-app setup, Waze best practices, Gaia iPad backup, audio priority chain, startup sequence |
 | 2026-06-05 | Reviewed RDForum Highway Radar posts (past 12 months); updated for v3.2 release (Apr 2026) |
 | 2026-06-05 | Updated app version to v3.2; documented fixed lockout bug (ALO candidate stall) |
 | 2026-06-05 | Updated aircraft alerts section — v3.2 crash fix, safe to re-enable |
